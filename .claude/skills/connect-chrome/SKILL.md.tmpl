@@ -1,0 +1,242 @@
+---
+name: connect-chrome
+version: 0.2.0
+description: |
+  Launch GStack Browser — AI-controlled Chromium with the sidebar extension baked in.
+  Opens a visible browser window where you can watch every action in real time.
+  The sidebar shows a live activity feed and chat. Anti-bot stealth built in.
+  Supports multiple simultaneous Chromium instances on different ports (34567+).
+  Use when asked to "connect chrome", "open chrome", "launch browser",
+  "open gstack browser", "real browser", "launch chrome", or "control my browser".
+voice-triggers:
+  - "connect chrome"
+  - "show me the browser"
+triggers:
+  - connect chrome
+  - open chrome
+  - launch browser
+allowed-tools:
+  - Bash
+  - Read
+  - AskUserQuestion
+
+---
+
+{{PREAMBLE}}
+
+# /open-gstack-browser — Launch GStack Browser
+
+Launch GStack Browser — AI-controlled Chromium with the sidebar extension,
+anti-bot stealth, and custom branding. You see every action in real time.
+
+{{BROWSE_SETUP}}
+
+## Step 0: Pre-flight cleanup (parallel-agent safe)
+
+Each /connect-chrome invocation runs in its own port AND its own Chromium
+profile dir (`~/.gstack/chromium-profile-<port>`). There's nothing shared to
+clean up here — no SingletonLock conflict can happen between agents. We just
+sweep abandoned lock files for profile dirs whose owning Chromium is gone.
+
+```bash
+# Per-port profile dirs (chromium-profile-34567, -34568, ...) are fully
+# isolated; we only sweep locks for dirs that have no live Chromium.
+for _DIR in "$HOME/.gstack"/chromium-profile-*; do
+  [ -d "$_DIR" ] || continue
+  _SUFFIX="${_DIR##*-}"
+  _LIVE=0
+  if command -v tasklist >/dev/null 2>&1; then
+    tasklist 2>/dev/null | awk '{print $2}' | grep -q "^${_SUFFIX}$" && _LIVE=1
+    pgrep -f "user-data-dir=$_DIR" >/dev/null 2>&1 && _LIVE=1
+  elif command -v pgrep >/dev/null 2>&1; then
+    pgrep -f "user-data-dir=$_DIR" >/dev/null 2>&1 && _LIVE=1
+  fi
+  if [ "$_LIVE" = "0" ]; then
+    for _LF in SingletonLock SingletonSocket SingletonCookie; do
+      rm -f "$_DIR/$_LF" 2>/dev/null || true
+    done
+  fi
+done
+echo "Pre-flight cleanup done (per-port profiles; live ones left alone)"
+```
+
+## Step 1: Connect (auto-port)
+
+```bash
+# Auto-find a free port starting at 34567 (parallel-agent safe)
+_PORT=34567
+while netstat -ano -p TCP 2>/dev/null | awk '/LISTENING/ {print $2}' | grep -q ":$_PORT$"; do
+  _PORT=$((_PORT + 1))
+  [ "$_PORT" -gt 34600 ] && { echo "ERROR: no free port in 34567-34600"; exit 1; }
+done
+echo "BROWSE_PORT=$_PORT (auto-selected)"
+# Per-agent isolation: profile dir + state file are keyed off the port so two
+# agents never collide on Chromium's SingletonLock or on ~/.gstack/browse.json.
+export BROWSE_STATE_FILE="$HOME/.gstack/browse-$_PORT.json"
+BROWSE_PORT=$_PORT $B connect
+```
+
+This launches GStack Browser (rebranded Chromium) in headed mode with:
+- A visible window you can watch (not your regular Chrome — it stays untouched)
+- The gstack sidebar extension auto-loaded via `launchPersistentContext`
+- Anti-bot stealth patches (sites like Google and NYTimes work without captchas)
+- Custom user agent and GStack Browser branding in Dock/menu bar
+- A sidebar agent process for chat commands
+
+**Each agent runs in full isolation:**
+- Port auto-picked from 34567+ (agent A→34567, agent B→34568, ...)
+- Profile dir: `~/.gstack/chromium-profile-<port>/` (own cookies, own SingletonLock)
+- State file: `~/.gstack/browse-<port>.json` (own port/token, so `$B status`
+  from this shell talks to THIS agent's server, not another agent's)
+
+The downside of per-agent profiles: each agent has its own cookie/auth jar.
+Logging into Gmail in agent A does not carry over to agent B. If you need
+shared sessions, run sequentially instead of in parallel.
+
+The sidebar extension still hardcodes auto-connect on **port 34567**. On any
+other port the badge stays gray until you click the gstack icon's gear and
+enter the actual port (see Step 3).
+
+After connecting, print the full output to the user. Confirm you see
+`Mode: headed` in the output.
+
+If the output shows an error or the mode is not `headed`, run `$B status` and
+share the output with the user before proceeding.
+
+## Step 2: Verify
+
+```bash
+$B status
+```
+
+Confirm the output shows `Mode: headed`. Read the actual port that was chosen:
+
+```bash
+cat "$BROWSE_STATE_FILE" 2>/dev/null | grep -o '"port":[0-9]*' | grep -o '[0-9]*'
+```
+
+Note this port — it may be 34567 (most common) or 34568+ if another agent
+already held 34567. Save it as `$_PORT` for the rest of the workflow; tell
+the user the port so they can enter it manually in the sidebar extension
+if auto-connect fails.
+
+Also find the extension path so you can help the user if they need to load it manually:
+
+```bash
+_EXT_PATH=""
+_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+[ -n "$_ROOT" ] && [ -f "$_ROOT/.claude/skills/gstack/extension/manifest.json" ] && _EXT_PATH="$_ROOT/.claude/skills/gstack/extension"
+[ -z "$_EXT_PATH" ] && [ -f "$HOME/.claude/skills/gstack/extension/manifest.json" ] && _EXT_PATH="$HOME/.claude/skills/gstack/extension"
+echo "EXTENSION_PATH: ${_EXT_PATH:-NOT FOUND}"
+```
+
+## Step 3: Guide the user to the Side Panel
+
+Use AskUserQuestion:
+
+> Chrome is launched with gstack control. You should see Playwright's Chromium
+> (not your regular Chrome) with a golden shimmer line at the top of the page.
+>
+> The Side Panel extension should be auto-loaded. To open it:
+> 1. Look for the **puzzle piece icon** (Extensions) in the toolbar — it may
+>    already show the gstack icon if the extension loaded successfully
+> 2. Click the **puzzle piece** → find **gstack browse** → click the **pin icon**
+> 3. Click the pinned **gstack icon** in the toolbar
+> 4. The Side Panel should open on the right showing a live activity feed
+>
+> **Port:** `$_PORT` (from Step 2 — typically 34567, possibly 34568+ if another
+> agent is running in parallel). The extension auto-connects on 34567; on any
+> other port you'll need to enter it manually via the sidebar's gear icon.
+
+Options:
+- A) I can see the Side Panel — let's go!
+- B) I can see Chrome but can't find the extension
+- C) Something went wrong
+
+If B: Tell the user:
+
+> The extension is loaded into Playwright's Chromium at launch time, but
+> sometimes it doesn't appear immediately. Try these steps:
+>
+> 1. Type `chrome://extensions` in the address bar
+> 2. Look for **"gstack browse"** — it should be listed and enabled
+> 3. If it's there but not pinned, go back to any page, click the puzzle piece
+>    icon, and pin it
+> 4. If it's NOT listed at all, click **"Load unpacked"** and navigate to:
+>    - Press **Cmd+Shift+G** in the file picker dialog
+>    - Paste this path: `{EXTENSION_PATH}` (use the path from Step 2)
+>    - Click **Select**
+>
+> After loading, pin it and click the icon to open the Side Panel.
+>
+> If the Side Panel badge stays gray (disconnected), click the gstack icon
+> and enter the port from Step 2 manually (default 34567, but may be 34568+ if
+> another agent is running in parallel).
+
+If C:
+
+1. Run `$B status` and show the output
+2. If the server is not healthy, re-run Step 0 cleanup + Step 1 connect
+3. If the server IS healthy but the browser isn't visible, try `$B focus`
+4. If that fails, ask the user what they see (error message, blank screen, etc.)
+
+## Step 4: Demo
+
+After the user confirms the Side Panel is working, run a quick demo:
+
+```bash
+$B goto https://news.ycombinator.com
+```
+
+Wait 2 seconds, then:
+
+```bash
+$B snapshot -i
+```
+
+Tell the user: "Check the Side Panel — you should see the `goto` and `snapshot`
+commands appear in the activity feed. Every command Claude runs shows up here
+in real time."
+
+## Step 5: Sidebar chat
+
+After the activity feed demo, tell the user about the sidebar chat:
+
+> The Side Panel also has a **chat tab**. Try typing a message like "take a
+> snapshot and describe this page." A sidebar agent (a child Claude instance)
+> executes your request in the browser — you'll see the commands appear in
+> the activity feed as they happen.
+>
+> The sidebar agent can navigate pages, click buttons, fill forms, and read
+> content. Each task gets up to 5 minutes. It runs in an isolated session, so
+> it won't interfere with this Claude Code window.
+
+## Step 6: What's next
+
+Tell the user:
+
+> You're all set! Here's what you can do with the connected Chrome:
+>
+> **Watch Claude work in real time:**
+> - Run any gstack skill (`/qa`, `/design-review`, `/benchmark`) and watch
+>   every action happen in the visible Chrome window + Side Panel feed
+> - No cookie import needed — the Playwright browser shares its own session
+>
+> **Control the browser directly:**
+> - **Sidebar chat** — type natural language in the Side Panel and the sidebar
+>   agent executes it (e.g., "fill in the login form and submit")
+> - **Browse commands** — `$B goto <url>`, `$B click <sel>`, `$B fill <sel> <val>`,
+>   `$B snapshot -i` — all visible in Chrome + Side Panel
+>
+> **Window management:**
+> - `$B focus` — bring Chrome to the foreground anytime
+> - `$B disconnect` — close headed Chrome and return to headless mode
+>
+> **What skills look like in headed mode:**
+> - `/qa` runs its full test suite in the visible browser — you see every page
+>   load, every click, every assertion
+> - `/design-review` takes screenshots in the real browser — same pixels you see
+> - `/benchmark` measures performance in the headed browser
+
+Then proceed with whatever the user asked to do. If they didn't specify a task,
+ask what they'd like to test or browse.

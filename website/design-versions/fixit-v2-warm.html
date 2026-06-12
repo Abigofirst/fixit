@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FixIt — Your neighbourhood pros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --coral:#F47B20; --coral-d:#d96a10; --coral-soft:#fde6d4;
+    --plum:#16335B; --plum-2:#1d4376; --grape:#2a5083;
+    --wa:#25D366; --wa-d:#1da851;
+    --ink:#1f1147; --muted:#6b5e85; --line:#efe7f0;
+    --bg:#fbf6f3; --card:#ffffff; --cream:#fff4ee;
+    --green:#0fb87f; --gold:#f5a524;
+    --rad:22px; --pill:999px; --shadow:0 14px 40px rgba(46,16,101,.10);
+    --disp:'Bricolage Grotesque',system-ui,sans-serif;
+    --body:'Plus Jakarta Sans',system-ui,sans-serif;
+  }
+  html[dir="rtl"]{ --disp:'Tajawal',system-ui,sans-serif; --body:'Tajawal',system-ui,sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--body);background:var(--bg);color:var(--ink);line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  .wrap{max-width:1180px;margin-inline:auto;padding-inline:24px}
+  .hidden{display:none!important}
+  h1,h2,h3,h4,.disp{font-family:var(--disp);letter-spacing:-.02em}
+
+  /* NAV */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(251,246,243,.86);backdrop-filter:blur(12px)}
+  .nav-inner{display:flex;align-items:center;gap:26px;height:74px}
+  .logo{display:flex;align-items:center;gap:11px;font-family:var(--disp);font-weight:800;font-size:1.4rem}
+  .logo .mark{width:38px;height:38px;border-radius:13px;background:var(--coral);display:grid;place-items:center;color:#fff;font-weight:800;transform:rotate(-6deg);box-shadow:0 6px 16px rgba(255,90,60,.4)}
+  .nav-links{display:flex;gap:4px;margin-inline-start:auto}
+  .nav-links button{padding:10px 15px;border-radius:var(--pill);color:var(--ink);font-weight:600;font-size:.94rem;font-family:var(--body)}
+  .nav-links button:hover{background:var(--coral-soft);color:var(--coral-d)}
+  .nav-links button.active{background:var(--plum);color:#fff}
+  .nav-right{display:flex;align-items:center;gap:10px}
+  .lang-toggle{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:var(--pill);padding:8px 14px;font-weight:700;font-size:.85rem;color:var(--plum)}
+  .lang-toggle:hover{background:var(--plum);color:#fff}
+  .btn{display:inline-flex;align-items:center;gap:8px;border-radius:var(--pill);padding:12px 22px;font-weight:700;font-size:.94rem;transition:.18s;font-family:var(--body)}
+  .btn-primary{background:var(--coral);color:#fff;box-shadow:0 8px 22px rgba(244,123,32,.32)}
+  .btn-primary:hover{background:var(--coral-d);transform:translateY(-2px)}
+  .btn-wa{background:var(--wa);color:#fff;box-shadow:0 8px 22px rgba(37,211,102,.3)}
+  .btn-wa:hover{background:var(--wa-d);transform:translateY(-2px)}
+  .btn-dark{background:var(--plum);color:#fff}
+  .btn-dark:hover{background:var(--plum-2)}
+  .btn-ghost{background:#fff;color:var(--plum);border:1.5px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--coral);color:var(--coral-d)}
+  .hamburger{display:none}
+
+  /* HERO */
+  .hero{position:relative;padding:54px 0 70px;overflow:hidden}
+  .hero::before{content:"";position:absolute;top:-120px;inset-inline-end:-120px;width:480px;height:480px;background:radial-gradient(circle,var(--coral-soft),transparent 70%);z-index:0}
+  .hero-inner{position:relative;z-index:1;text-align:center;max-width:820px;margin-inline:auto}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);color:var(--plum);font-weight:700;font-size:.82rem;padding:8px 16px;border-radius:var(--pill);margin-bottom:24px;box-shadow:var(--shadow)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .hero h1{font-size:clamp(2.6rem,6vw,4.4rem);line-height:1.02;font-weight:800}
+  .hero h1 .hl{color:var(--coral);position:relative;white-space:nowrap}
+  .hero h1 .hl::after{content:"";position:absolute;inset-inline-start:0;bottom:6px;width:100%;height:10px;background:var(--gold);opacity:.35;border-radius:6px;z-index:-1}
+  .hero p.lead{font-size:1.16rem;color:var(--muted);margin:22px auto 0;max-width:54ch}
+  /* big rounded search console */
+  .console{margin:34px auto 0;max-width:760px;background:#fff;border-radius:var(--pill);box-shadow:var(--shadow);padding:8px;display:flex;align-items:center;gap:6px}
+  .console .seg{flex:1;display:flex;flex-direction:column;align-items:flex-start;padding:8px 20px;text-align:start;border-inline-end:1px solid var(--line)}
+  .console .seg:last-of-type{border:none}
+  .console label{font-size:.72rem;font-weight:700;color:var(--coral-d);text-transform:uppercase;letter-spacing:.04em}
+  .console select,.console input{border:none;outline:none;font-family:var(--body);font-weight:600;font-size:.96rem;color:var(--ink);width:100%;background:transparent}
+  .console .go{width:54px;height:54px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-size:1.3rem;flex-shrink:0}
+  .console .go:hover{background:var(--coral-d)}
+  .stat-strip{display:flex;justify-content:center;gap:42px;margin-top:34px;flex-wrap:wrap}
+  .stat-strip div{text-align:center}
+  .stat-strip b{font-family:var(--disp);font-size:1.7rem;display:block;color:var(--plum)}
+  .stat-strip small{color:var(--muted);font-weight:600}
+
+  section.block{padding:60px 0}
+  .sec-head{margin-bottom:32px;max-width:640px}
+  .sec-head .kick{color:var(--coral-d);font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+  .sec-head h2{font-size:clamp(1.9rem,4vw,2.7rem);font-weight:800}
+  .sec-head p{color:var(--muted);margin-top:10px}
+  .sec-flex{display:flex;justify-content:space-between;align-items:flex-end}
+
+  /* category bento */
+  .cats{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+  .cat{border-radius:var(--rad);padding:20px;min-height:140px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:.2s;color:#fff;position:relative;overflow:hidden}
+  .cat:hover{transform:translateY(-5px) rotate(-1deg)}
+  .cat .ico{font-size:1.9rem}
+  .cat span{font-family:var(--disp);font-weight:700;font-size:1.02rem}
+  .cat small{opacity:.85;font-size:.78rem;font-weight:600}
+  .cat:nth-child(1){background:linear-gradient(150deg,#ff5a3c,#ff8a3c)}
+  .cat:nth-child(2){background:linear-gradient(150deg,#7c3aed,#a855f7)}
+  .cat:nth-child(3){background:linear-gradient(150deg,#0fb87f,#34d399)}
+  .cat:nth-child(4){background:linear-gradient(150deg,#2e1065,#5b21b6)}
+  .cat:nth-child(5){background:linear-gradient(150deg,#f5a524,#fbbf24)}
+  .cat:nth-child(6){background:linear-gradient(150deg,#ec4899,#f472b6)}
+
+  /* pro rows */
+  .pro-rows{display:grid;gap:16px}
+  .pro-row{background:#fff;border-radius:var(--rad);padding:18px;display:grid;grid-template-columns:auto 1fr auto auto;gap:20px;align-items:center;transition:.18s;cursor:pointer;border:1px solid transparent}
+  .pro-row:hover{box-shadow:var(--shadow);border-color:var(--coral-soft);transform:translateX(0) scale(1.005)}
+  .pro-row .ph{position:relative}
+  .pro-row .ph img{width:78px;height:78px;border-radius:18px;object-fit:cover}
+  .pro-row .ph .vf{position:absolute;bottom:-6px;inset-inline-end:-6px;background:var(--green);color:#fff;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.7rem;border:2px solid #fff}
+  .pro-row h4{font-size:1.18rem;font-weight:700}
+  .pro-row .role{color:var(--grape);font-weight:700;font-size:.86rem}
+  .pro-row .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+  .tag{background:var(--cream);color:var(--coral-d);font-size:.74rem;font-weight:700;padding:5px 11px;border-radius:var(--pill)}
+  .pro-row .nums{text-align:center}
+  .pro-row .nums .rt{font-family:var(--disp);font-size:1.1rem;font-weight:700;color:var(--gold)}
+  .pro-row .nums small{display:block;color:var(--muted);font-size:.74rem}
+  .pro-row .price{text-align:end}
+  .pro-row .price b{font-family:var(--disp);font-size:1.4rem}
+  .pro-row .price small{display:block;color:var(--muted);font-size:.74rem}
+
+  /* steps path */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .step{background:#fff;border-radius:var(--rad);padding:28px;position:relative}
+  .step .n{font-family:var(--disp);font-size:3rem;font-weight:800;color:var(--coral-soft);line-height:1;position:absolute;top:18px;inset-inline-end:22px}
+  .step .ico{width:52px;height:52px;border-radius:16px;background:var(--coral-soft);display:grid;place-items:center;font-size:1.5rem;margin-bottom:16px}
+  .step h4{font-size:1.22rem;margin-bottom:6px}
+  .step p{color:var(--muted);font-size:.95rem}
+
+  /* dual */
+  .dual{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .panel{border-radius:28px;padding:38px;color:#fff;position:relative;overflow:hidden}
+  .panel.client{background:linear-gradient(140deg,var(--coral),#ff8a3c)}
+  .panel.tech{background:linear-gradient(140deg,var(--plum),var(--grape))}
+  .panel h3{font-size:1.7rem;margin-bottom:8px}
+  .panel ul{list-style:none;margin:18px 0 24px;display:grid;gap:11px}
+  .panel li{display:flex;gap:10px;align-items:flex-start;font-weight:500}
+  .panel li::before{content:"✦";opacity:.85}
+  .panel .btn{background:#fff;color:var(--plum)}
+
+  footer{background:var(--plum);color:#d9cef0;padding:56px 0 28px;margin-top:40px}
+  .foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:30px}
+  footer h5{color:#fff;font-family:var(--disp);margin-bottom:14px}
+  footer a{display:block;color:#c4b5e6;font-size:.9rem;padding:5px 0}
+  footer a:hover{color:#fff}
+  .foot-bot{border-top:1px solid #4c2a86;margin-top:32px;padding-top:20px;display:flex;justify-content:space-between;color:#a78fce;font-size:.85rem;flex-wrap:wrap;gap:10px}
+
+  /* APP VIEWS */
+  .view{display:none}
+  .view.active{display:block;animation:fade .35s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .page-head{padding:40px 0 6px}
+  .page-head h1{font-size:2.3rem;font-weight:800}
+  .page-head p{color:var(--muted)}
+  .breadcrumb{color:var(--coral-d);font-size:.85rem;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+
+  .chip-row{display:flex;gap:9px;flex-wrap:wrap}
+  .chip{padding:9px 16px;border-radius:var(--pill);background:#fff;border:1.5px solid var(--line);font-size:.88rem;font-weight:700;color:var(--plum);cursor:pointer;transition:.15s}
+  .chip:hover,.chip.sel{background:var(--coral);color:#fff;border-color:var(--coral)}
+
+  .book-grid{display:grid;grid-template-columns:1.4fr .9fr;gap:26px;align-items:start;padding-bottom:60px}
+  .form-card{background:#fff;border-radius:28px;padding:32px;box-shadow:var(--shadow)}
+  .form-card h3{font-size:1.4rem;margin-bottom:4px}
+  .form-card .sub{color:var(--muted);font-size:.9rem;margin-bottom:24px}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-weight:700;font-size:.88rem;margin-bottom:7px}
+  .field input,.field select,.field textarea{width:100%;border:1.5px solid var(--line);border-radius:16px;padding:13px 16px;font-family:var(--body);font-size:.96rem;color:var(--ink);background:#fff;transition:.15s}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--coral);box-shadow:0 0 0 4px var(--coral-soft)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .req{color:var(--coral)}
+  .hint{font-size:.78rem;color:var(--muted);margin-top:6px}
+  .upload{border:2px dashed var(--line);border-radius:18px;padding:28px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s;background:var(--cream)}
+  .upload:hover{border-color:var(--coral);color:var(--coral-d)}
+  .upload .ic{font-size:2rem;margin-bottom:6px}
+  #v2-previews{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  #v2-previews img{width:76px;height:76px;border-radius:14px;object-fit:cover;border:2px solid #fff;box-shadow:var(--shadow)}
+  .tasker-pick{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px}
+  .pick{min-width:150px;border:1.5px solid var(--line);border-radius:18px;padding:14px;text-align:center;cursor:pointer;transition:.15s;background:#fff}
+  .pick:hover,.pick.sel{border-color:var(--coral);box-shadow:0 0 0 4px var(--coral-soft)}
+  .pick.sel{background:var(--cream)}
+  .pick img{width:52px;height:52px;border-radius:50%;margin:0 auto 8px;object-fit:cover}
+  .pick b{display:block;font-size:.9rem;font-family:var(--disp)}
+  .pick small{color:var(--muted);font-size:.74rem}
+  .summary{background:var(--plum);color:#fff;border-radius:28px;padding:28px;position:sticky;top:90px}
+  .summary h4{color:#fff;font-size:1.2rem;margin-bottom:16px}
+  .sum-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px dashed #5b3a93;font-size:.92rem}
+  .sum-row span:first-child{color:#c4b5e6}
+  .sum-row span:last-child{font-weight:700;text-align:end;max-width:60%}
+  .sum-total{display:flex;justify-content:space-between;padding-top:16px;font-family:var(--disp);font-size:1.4rem;font-weight:800}
+  .sum-total span:last-child{color:var(--coral)}
+
+  .dash-tabs{display:flex;gap:8px;margin:16px 0 26px;flex-wrap:wrap}
+  .dash-tabs button{padding:11px 18px;font-weight:700;color:var(--plum);border-radius:var(--pill);background:#fff;border:1.5px solid var(--line);font-family:var(--body)}
+  .dash-tabs button.active{background:var(--plum);color:#fff;border-color:var(--plum)}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px}
+  .stat{background:#fff;border-radius:20px;padding:20px}
+  .stat b{font-family:var(--disp);font-size:1.9rem;display:block}
+  .stat small{color:var(--muted);font-weight:600}
+  .stat .up{color:var(--green);font-weight:700;font-size:.8rem}
+
+  .cal{background:#fff;border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
+  .cal-head{display:grid;grid-template-columns:70px repeat(7,1fr);background:var(--cream)}
+  .cal-head div{padding:13px 8px;text-align:center;font-weight:700;font-size:.82rem;color:var(--muted)}
+  .cal-head div b{display:block;font-family:var(--disp);font-size:1.05rem;color:var(--plum)}
+  .cal-row{display:grid;grid-template-columns:70px repeat(7,1fr);border-top:1px solid var(--line);min-height:64px}
+  .cal-time{padding:8px;font-size:.78rem;color:var(--muted);font-weight:700;border-inline-end:1px solid var(--line);text-align:center}
+  .cal-cell{border-inline-end:1px solid var(--line);padding:5px}
+  .appt{border-radius:13px;padding:8px 10px;font-size:.76rem;font-weight:700;color:#fff;cursor:pointer;height:100%;display:flex;flex-direction:column;justify-content:center}
+  .appt small{font-weight:500;opacity:.92;font-size:.7rem}
+  .appt.b1{background:var(--coral)}.appt.b2{background:var(--green)}.appt.b3{background:var(--gold)}.appt.b4{background:var(--grape)}
+
+  .req-list{display:grid;gap:14px}
+  .req-card{background:#fff;border-radius:20px;padding:18px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+  .req-card>img{width:56px;height:56px;border-radius:16px;object-fit:cover}
+  .req-card h4{font-size:1.05rem}
+  .req-card .det{color:var(--muted);font-size:.85rem;font-weight:600;display:flex;gap:14px;flex-wrap:wrap;margin-top:5px}
+  .req-actions{display:flex;gap:8px}
+  .pill{padding:4px 12px;border-radius:var(--pill);font-size:.74rem;font-weight:700}
+  .pill.new{background:#fff0d6;color:#b46708}.pill.confirmed{background:#d4f6e9;color:#0a805a}.pill.done{background:#ece3fb;color:#6d28d9}
+  .btn-sm{padding:9px 15px;border-radius:var(--pill);font-weight:700;font-size:.82rem;font-family:var(--body)}
+  .btn-accept{background:var(--green);color:#fff}.btn-decline{background:#fff;border:1.5px solid var(--line);color:var(--muted)}
+
+  .modal-back{position:fixed;inset:0;background:rgba(31,17,71,.55);backdrop-filter:blur(4px);z-index:100;display:none;place-items:center;padding:20px}
+  .modal-back.open{display:grid}
+  .modal{background:#fff;border-radius:28px;max-width:470px;width:100%;overflow:hidden;animation:pop .25s ease}
+  @keyframes pop{from{transform:scale(.94);opacity:0}to{transform:none;opacity:1}}
+  .modal-hero{height:120px;background:linear-gradient(140deg,var(--coral),#ff8a3c);position:relative}
+  .modal-hero img{width:88px;height:88px;border-radius:22px;border:4px solid #fff;object-fit:cover;position:absolute;bottom:-32px;inset-inline-start:28px}
+  .modal-close{position:absolute;top:14px;inset-inline-end:14px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;color:var(--plum);z-index:2}
+  .modal-body{padding:44px 28px 28px}
+  .modal-body h3{font-size:1.4rem}
+  .modal-body .mrole{color:var(--grape);font-weight:700;margin-bottom:14px}
+  .modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+  .modal-stats div{background:var(--cream);border-radius:16px;padding:14px;text-align:center}
+  .modal-stats b{display:block;font-family:var(--disp);font-size:1.2rem}
+  .modal-stats small{color:var(--muted);font-size:.74rem}
+
+  .toast{position:fixed;bottom:26px;inset-inline-end:26px;background:var(--plum);color:#fff;padding:16px 24px;border-radius:var(--pill);font-weight:700;box-shadow:var(--shadow);z-index:120;display:flex;gap:10px;align-items:center;transform:translateY(120px);transition:.35s}
+  .toast.show{transform:none}
+
+  @media(max-width:980px){
+    .hero-grid,.dual,.book-grid{grid-template-columns:1fr}
+    .cats{grid-template-columns:repeat(2,1fr)}
+    .steps{grid-template-columns:1fr}
+    .stat-row{grid-template-columns:1fr 1fr}
+    .nav-links{display:none}.hamburger{display:grid;margin-inline-start:auto}
+    .foot-grid{grid-template-columns:1fr 1fr}
+    .console{flex-wrap:wrap;border-radius:28px}
+    .console .seg{border:none;min-width:45%}
+    .pro-row{grid-template-columns:auto 1fr;gap:14px}
+    .pro-row .nums,.pro-row .price{grid-column:span 2;text-align:start;display:flex;gap:18px;align-items:center}
+    .cal-head,.cal-row{grid-template-columns:50px repeat(7,1fr)}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" onclick="go('home')" aria-label="FixIt"><img src="fixit-logo-trim.jpeg" alt="FixIt — Reliable Home Services" style="height:46px;width:auto;display:block" /></a>
+    <nav class="nav-links" id="navlinks">
+      <button data-go="home" class="active" data-i18n="nav_home">Home</button>
+      <button data-go="find" data-i18n="nav_find">Find a Pro</button>
+      <button data-go="book" data-i18n="nav_book">Book a Service</button>
+      <button data-go="client" data-i18n="nav_client">Client Dashboard</button>
+      <button data-go="tech" data-i18n="nav_tech">Pro Dashboard</button>
+    </nav>
+    <div class="nav-right">
+      <button class="lang-toggle" onclick="toggleLang()"><span>🌐</span><span id="langLabel">العربية</span></button>
+      <button class="btn btn-primary" onclick="go('book')" data-i18n="nav_cta">Get started</button>
+    </div>
+  </div>
+</header>
+
+<!-- HOME -->
+<main id="home" class="view active">
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <span class="eyebrow"><span class="dot"></span><span data-i18n="hero_badge">2,400 pros online right now</span></span>
+      <h1 data-i18n="hero_h1">The home help next door, <span class="hl">on demand</span>.</h1>
+      <p class="lead" data-i18n="hero_lead">Plumbers, electricians, cleaners and handymen your neighbours already trust. Browse real availability, pick a time, done.</p>
+      <div class="console">
+        <div class="seg">
+          <label data-i18n="f_service">Service</label>
+          <select id="heroService">
+            <option data-i18n="opt_plumb">Plumbing</option><option data-i18n="opt_elec">Electrical</option><option data-i18n="opt_clean">Cleaning</option><option data-i18n="opt_ac">AC Maintenance</option><option data-i18n="opt_handy">Handyman</option><option data-i18n="opt_paint">Painting</option>
+          </select>
+        </div>
+        <div class="seg">
+          <label data-i18n="f_location">Location</label>
+          <input id="heroLoc" placeholder="District, city" data-ph="f_location_ph" />
+        </div>
+        <div class="seg">
+          <label data-i18n="f_when">When</label>
+          <select id="heroWhen2">
+            <option data-i18n="when_today">Today</option><option data-i18n="when_tom">Tomorrow</option><option data-i18n="when_week">This week</option>
+          </select>
+        </div>
+        <button class="go" onclick="go('find')" aria-label="search">→</button>
+      </div>
+      <div class="stat-strip">
+        <div><b>40k+</b><small data-i18n="ss1">Happy homes</small></div>
+        <div><b>4.9★</b><small data-i18n="ss2">Average rating</small></div>
+        <div><b>6 min</b><small data-i18n="ss3">Avg. response</small></div>
+        <div><b>1,800+</b><small data-i18n="ss4">Vetted pros</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block wrap">
+    <div class="sec-head"><div class="kick" data-i18n="cat_kick">Browse</div><h2 data-i18n="cat_title">Pick a service to get started</h2></div>
+    <div class="cats" id="catGrid"></div>
+  </section>
+
+  <section class="block wrap">
+    <div class="sec-flex sec-head" style="max-width:none">
+      <div><div class="kick" data-i18n="pros_kick">Top rated</div><h2 data-i18n="pros_title">Pros your neighbours love</h2></div>
+      <button class="btn btn-ghost" onclick="go('find')" data-i18n="see_all">See all pros</button>
+    </div>
+    <div class="pro-rows" id="homeTaskers"></div>
+  </section>
+
+  <section class="block wrap">
+    <div class="sec-head"><div class="kick" data-i18n="how_kick">How it works</div><h2 data-i18n="how_title">Booked before your coffee's cold</h2></div>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div class="ico">📝</div><h4 data-i18n="how1_h">Describe the job</h4><p data-i18n="how1_p">Tell us what you need, your location and preferred time. Add a photo so pros come prepared.</p></div>
+      <div class="step"><div class="n">2</div><div class="ico">👋</div><h4 data-i18n="how2_h">Pick your pro</h4><p data-i18n="how2_p">Compare verified pros by rating, price and live availability, then choose your slot.</p></div>
+      <div class="step"><div class="n">3</div><div class="ico">✅</div><h4 data-i18n="how3_h">Relax, it's handled</h4><p data-i18n="how3_p">Track your pro in real time, pay securely in-app, and rate the job when it's done.</p></div>
+    </div>
+  </section>
+
+  <section class="block wrap">
+    <div class="dual">
+      <div class="panel client">
+        <h3 data-i18n="dual_c_h">For clients</h3>
+        <p data-i18n="dual_c_p">One marketplace for every home job, on your schedule.</p>
+        <ul><li data-i18n="dual_c1">Browse pros by live availability</li><li data-i18n="dual_c2">Transparent upfront pricing</li><li data-i18n="dual_c3">Secure in-app payment & chat</li><li data-i18n="dual_c4">Reschedule or cancel anytime</li></ul>
+        <button class="btn" onclick="go('client')" data-i18n="dual_c_cta">Open client dashboard</button>
+      </div>
+      <div class="panel tech">
+        <h3 data-i18n="dual_t_h">For professionals</h3>
+        <p data-i18n="dual_t_p">Fill your calendar and grow your business, you stay in control.</p>
+        <ul><li data-i18n="dual_t1">Set your own schedule & rates</li><li data-i18n="dual_t2">Accept or decline every request</li><li data-i18n="dual_t3">Get paid fast, weekly payouts</li><li data-i18n="dual_t4">Build a reputation that pays</li></ul>
+        <button class="btn" onclick="go('tech')" data-i18n="dual_t_cta">Open pro dashboard</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FIND -->
+<main id="find" class="view">
+  <div class="wrap page-head">
+    <div class="breadcrumb" data-i18n="bc_find">Home / Find a pro</div>
+    <h1 data-i18n="find_h">Available professionals</h1>
+    <p data-i18n="find_p">Showing vetted pros with open slots. Tap any pro to view their profile and book.</p>
+  </div>
+  <div class="wrap" style="padding:14px 24px"><div class="chip-row" id="findFilters">
+    <span class="chip sel" data-i18n="filt_all">All</span><span class="chip" data-i18n="opt_plumb">Plumbing</span><span class="chip" data-i18n="opt_elec">Electrical</span><span class="chip" data-i18n="opt_clean">Cleaning</span><span class="chip" data-i18n="opt_ac">AC Maintenance</span><span class="chip" data-i18n="opt_handy">Handyman</span>
+  </div></div>
+  <div class="wrap" style="padding-bottom:60px"><div class="pro-rows" id="findTaskers"></div></div>
+</main>
+
+<!-- BOOK -->
+<main id="book" class="view">
+  <div class="wrap page-head">
+    <div class="breadcrumb" data-i18n="bc_book">Home / Book a service</div>
+    <h1 data-i18n="book_h">Tell us what you need</h1>
+    <p data-i18n="book_p">Fill in the details below and your matched pro will confirm within minutes.</p>
+  </div>
+  <div class="wrap book-grid">
+    <form class="form-card" id="bookForm" onsubmit="submitBooking(event)">
+      <h3 data-i18n="book_form_h">Service request</h3>
+      <p class="sub" data-i18n="book_form_sub">All fields marked with * are required.</p>
+      <div class="two">
+        <div class="field"><label data-i18n="f_name">Full name <span class="req">*</span></label><input required id="bf_name" placeholder="e.g. Layla Hassan" data-ph="f_name_ph" /></div>
+        <div class="field"><label data-i18n="f_phone">Phone</label><input id="bf_phone" placeholder="+20 1xx xxx xxxx" data-ph="f_phone_ph" /></div>
+      </div>
+      <div class="field"><label data-i18n="f_location">Location <span class="req">*</span></label><input required id="bf_loc" placeholder="Street, district, city" data-ph="f_loc_ph" /><div class="hint" data-i18n="f_loc_hint">Your exact address is shared only with the pro you confirm.</div></div>
+      <div class="two">
+        <div class="field"><label data-i18n="f_service2">Service needed <span class="req">*</span></label><select id="bf_service" required><option value="" data-i18n="opt_choose">Choose a service…</option><option data-i18n="opt_plumb">Plumbing</option><option data-i18n="opt_elec">Electrical</option><option data-i18n="opt_clean">Cleaning</option><option data-i18n="opt_ac">AC Maintenance</option><option data-i18n="opt_handy">Handyman</option><option data-i18n="opt_paint">Painting</option></select></div>
+        <div class="field"><label data-i18n="f_time">Preferred time <span class="req">*</span></label><input required id="bf_time" type="datetime-local" /></div>
+      </div>
+      <div class="field"><label data-i18n="f_pref_pro">Preferred professional</label><div class="tasker-pick" id="pickRow"></div><div class="hint" data-i18n="f_pref_hint">Optional, leave it to us and we'll match the best available pro.</div></div>
+      <div class="field"><label data-i18n="f_issue">Issue description <span class="req">*</span></label><textarea required id="bf_issue" rows="4" placeholder="Describe the problem in detail…" data-ph="f_issue_ph"></textarea></div>
+      <div class="field">
+        <label data-i18n="f_photo">Photo upload <small style="color:var(--muted);font-weight:500" data-i18n="f_optional">(optional)</small></label>
+        <label class="upload" for="bf_photo"><div class="ic">📷</div><div data-i18n="f_photo_cta">Click to upload photos of the issue</div><div class="hint" data-i18n="f_photo_hint">JPG or PNG, up to 5 images</div></label>
+        <input type="file" id="bf_photo" accept="image/*" multiple class="hidden" onchange="previewPhotos(event)" />
+        <div id="v2-previews"></div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px" data-i18n="f_submit">Confirm booking request</button>
+    </form>
+    <aside class="summary">
+      <h4 data-i18n="sum_h">Booking summary</h4>
+      <div class="sum-row"><span data-i18n="sum_service">Service</span><span id="sum_service">—</span></div>
+      <div class="sum-row"><span data-i18n="sum_pro">Professional</span><span id="sum_pro" data-i18n="sum_auto">Auto-match</span></div>
+      <div class="sum-row"><span data-i18n="sum_when">When</span><span id="sum_when">—</span></div>
+      <div class="sum-row"><span data-i18n="sum_where">Where</span><span id="sum_where">—</span></div>
+      <div class="sum-row"><span data-i18n="sum_callout">Call-out fee</span><span>EGP 150</span></div>
+      <div class="sum-row"><span data-i18n="sum_rate">Est. hourly</span><span id="sum_rate">EGP 180</span></div>
+      <div class="sum-total"><span data-i18n="sum_total">Est. total</span><span id="sum_total">EGP 330</span></div>
+      <p class="hint" style="margin-top:14px;color:#c4b5e6" data-i18n="sum_note">You only pay after the job is confirmed complete. No charge to request.</p>
+    </aside>
+  </div>
+</main>
+
+<!-- CLIENT -->
+<main id="client" class="view">
+  <div class="wrap page-head">
+    <div class="breadcrumb" data-i18n="bc_client">Dashboard / Client</div>
+    <h1 data-i18n="cl_h">Welcome back, Layla</h1>
+    <p data-i18n="cl_p">Manage your bookings and upcoming visits.</p>
+    <div class="dash-tabs" id="clTabs"><button class="active" data-tab="cl-up" data-i18n="cl_tab1">Upcoming</button><button data-tab="cl-cal" data-i18n="cl_tab2">My schedule</button><button data-tab="cl-past" data-i18n="cl_tab3">History</button></div>
+  </div>
+  <div class="wrap" style="padding-bottom:60px">
+    <div class="stat-row">
+      <div class="stat"><small data-i18n="cl_s1">Active bookings</small><b>3</b><span class="up" data-i18n="cl_s1b">2 confirmed</span></div>
+      <div class="stat"><small data-i18n="cl_s2">This month spent</small><b>EGP 1,240</b><span class="up">↓ 12%</span></div>
+      <div class="stat"><small data-i18n="cl_s3">Saved pros</small><b>5</b></div>
+      <div class="stat"><small data-i18n="cl_s4">Avg. response</small><b>6 min</b></div>
+    </div>
+    <div id="cl-up" class="dash-pane"><div class="req-list" id="clientBookings"></div></div>
+    <div id="cl-cal" class="dash-pane hidden"><div class="cal" id="clientCal"></div></div>
+    <div id="cl-past" class="dash-pane hidden"><div class="req-list" id="clientHistory"></div></div>
+  </div>
+</main>
+
+<!-- TECH -->
+<main id="tech" class="view">
+  <div class="wrap page-head">
+    <div class="breadcrumb" data-i18n="bc_tech">Dashboard / Professional</div>
+    <h1 data-i18n="t_h">Good morning, Ahmed</h1>
+    <p data-i18n="t_p">Here's your day. You have new requests waiting.</p>
+    <div class="dash-tabs" id="tTabs"><button class="active" data-tab="t-cal" data-i18n="t_tab1">My schedule</button><button data-tab="t-req" data-i18n="t_tab2">Requests <span style="background:var(--coral);color:#fff;border-radius:999px;padding:1px 8px;font-size:.72rem;margin-inline-start:4px">3</span></button><button data-tab="t-earn" data-i18n="t_tab3">Earnings</button></div>
+  </div>
+  <div class="wrap" style="padding-bottom:60px">
+    <div class="stat-row">
+      <div class="stat"><small data-i18n="t_s1">Today's jobs</small><b>4</b><span class="up" data-i18n="t_s1b">2 done</span></div>
+      <div class="stat"><small data-i18n="t_s2">This week earnings</small><b>EGP 4,820</b><span class="up">↑ 18%</span></div>
+      <div class="stat"><small data-i18n="t_s3">Rating</small><b>4.9★</b><span class="up">312 jobs</span></div>
+      <div class="stat"><small data-i18n="t_s4">Acceptance</small><b>96%</b></div>
+    </div>
+    <div id="t-cal" class="dash-pane"><div class="cal" id="techCal"></div></div>
+    <div id="t-req" class="dash-pane hidden"><div class="req-list" id="techRequests"></div></div>
+    <div id="t-earn" class="dash-pane hidden"><div class="req-list" id="techEarnings"></div></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div><div style="background:#fff;border-radius:12px;padding:8px 12px;display:inline-block;margin-bottom:14px"><img src="fixit-logo-trim.jpeg" alt="FixIt" style="height:40px;width:auto;display:block"></div><p style="color:#c4b5e6;font-size:.9rem;max-width:34ch" data-i18n="foot_about">The trusted marketplace connecting households with vetted home-service professionals.</p></div>
+      <div><h5 data-i18n="foot_c1">Company</h5><a>About</a><a>Careers</a><a>Press</a><a>Blog</a></div>
+      <div><h5 data-i18n="foot_c2">Services</h5><a data-i18n="opt_plumb">Plumbing</a><a data-i18n="opt_elec">Electrical</a><a data-i18n="opt_clean">Cleaning</a><a data-i18n="opt_ac">AC Maintenance</a></div>
+      <div><h5 data-i18n="foot_c3">Support</h5><a data-i18n="foot_help">Help center</a><a data-i18n="foot_safety">Trust & safety</a><a data-i18n="foot_terms">Terms</a><a data-i18n="foot_privacy">Privacy</a></div>
+    </div>
+    <div class="foot-bot"><span data-i18n="foot_copy">© 2026 FixIt. All rights reserved.</span><span data-i18n="foot_made">Made for every home.</span></div>
+  </div>
+</footer>
+
+<div class="modal-back" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hero"><button class="modal-close" onclick="closeModal()">✕</button><img id="m_img" src="" /></div>
+    <div class="modal-body">
+      <h3 id="m_name"></h3><div class="mrole" id="m_role"></div>
+      <p id="m_bio" style="color:var(--muted);font-size:.92rem"></p>
+      <div class="modal-stats"><div><b id="m_rate"></b><small data-i18n="m_hourly">per hour</small></div><div><b id="m_rating"></b><small data-i18n="m_rating">rating</small></div><div><b id="m_jobs"></b><small data-i18n="m_jobs">jobs done</small></div></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="bookThisPro()" data-i18n="m_book">Book this pro</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"><span>✓</span><span id="toastMsg"></span></div>
+
+<script>
+const PROS = [
+  {id:1,name:{en:"Ahmed Hassan",ar:"أحمد حسن"},role:{en:"Plumbing Specialist",ar:"أخصائي سباكة"},cat:"plumb",rate:180,rating:4.9,jobs:312,img:"https://i.pravatar.cc/200?img=12",tags:{en:["Leaks","Water heaters","Pipes"],ar:["تسريبات","سخانات","مواسير"]},bio:{en:"12 years fixing every kind of leak. Same-day emergency service across the city.",ar:"١٢ عاماً في إصلاح كل أنواع التسريبات. خدمة طوارئ في نفس اليوم."}},
+  {id:2,name:{en:"Mohamed Sameh",ar:"محمد سامح"},role:{en:"Electrical Expert",ar:"خبير كهرباء"},cat:"elec",rate:210,rating:4.8,jobs:248,img:"https://i.pravatar.cc/200?img=32",tags:{en:["Wiring","Panels","Lighting"],ar:["تمديدات","لوحات","إنارة"]},bio:{en:"Licensed electrician specialising in safe home wiring and smart-home installs.",ar:"كهربائي مرخّص متخصص في التمديدات الآمنة وتركيب المنازل الذكية."}},
+  {id:3,name:{en:"Mariam Saleh",ar:"مريم صالح"},role:{en:"Home Cleaning Pro",ar:"أخصائية تنظيف"},cat:"clean",rate:120,rating:5.0,jobs:540,img:"https://i.pravatar.cc/200?img=5",tags:{en:["Deep clean","Move-out","Eco"],ar:["تنظيف عميق","تسليم","صديق للبيئة"]},bio:{en:"Detail-obsessed deep cleaning with eco-friendly products. Trusted by 500+ homes.",ar:"تنظيف عميق دقيق بمنتجات صديقة للبيئة. موثوقة من أكثر من ٥٠٠ منزل."}},
+  {id:4,name:{en:"Tarek Ali",ar:"طارق علي"},role:{en:"AC Maintenance Expert",ar:"خبير صيانة تكييف"},cat:"ac",rate:200,rating:4.7,jobs:189,img:"https://i.pravatar.cc/200?img=58",tags:{en:["Install","Repair","Gas refill"],ar:["تركيب","صيانة","شحن غاز"]},bio:{en:"AC install, maintenance and gas refills for all major brands. Cool again, fast.",ar:"تركيب وصيانة وشحن غاز التكييفات لكل الماركات. برودة سريعة."}},
+  {id:5,name:{en:"Hana Mostafa",ar:"هنا مصطفى"},role:{en:"Handywoman",ar:"فنية صيانة عامة"},cat:"handy",rate:150,rating:4.9,jobs:276,img:"https://i.pravatar.cc/200?img=20",tags:{en:["Mounting","Repairs","Assembly"],ar:["تركيب","إصلاحات","تجميع"]},bio:{en:"From mounting shelves to assembling furniture, the small jobs, done right.",ar:"من تركيب الأرفف إلى تجميع الأثاث، المهام الصغيرة بإتقان."}},
+  {id:6,name:{en:"Youssef Galal",ar:"يوسف جلال"},role:{en:"Painter & Finisher",ar:"نقّاش وتشطيبات"},cat:"paint",rate:160,rating:4.8,jobs:204,img:"https://i.pravatar.cc/200?img=15",tags:{en:["Interior","Exterior","Decor"],ar:["داخلي","خارجي","ديكور"]},bio:{en:"Clean lines, premium finishes, zero mess. Walls that look brand new.",ar:"خطوط نظيفة وتشطيبات راقية بدون فوضى. جدران كأنها جديدة."}}
+];
+const CATS = [
+  {key:"plumb",icon:"🔧",en:"Plumbing",ar:"سباكة",cnt:{en:"320+ pros",ar:"+٣٢٠ فني"}},
+  {key:"elec",icon:"⚡",en:"Electrical",ar:"كهرباء",cnt:{en:"280+ pros",ar:"+٢٨٠ فني"}},
+  {key:"clean",icon:"🧹",en:"Cleaning",ar:"تنظيف",cnt:{en:"540+ pros",ar:"+٥٤٠ فني"}},
+  {key:"ac",icon:"❄️",en:"AC Maintenance",ar:"تكييف",cnt:{en:"190+ pros",ar:"+١٩٠ فني"}},
+  {key:"handy",icon:"🛠️",en:"Handyman",ar:"صيانة",cnt:{en:"410+ pros",ar:"+٤١٠ فني"}},
+  {key:"paint",icon:"🎨",en:"Painting",ar:"دهان",cnt:{en:"200+ pros",ar:"+٢٠٠ فني"}}
+];
+const I18N = {
+  nav_home:["Home","الرئيسية"],nav_find:["Find a Pro","ابحث عن فني"],nav_book:["Book a Service","احجز خدمة"],nav_client:["Client Dashboard","لوحة العميل"],nav_tech:["Pro Dashboard","لوحة الفني"],nav_cta:["Book on WhatsApp","احجز عبر واتساب"],
+  hero_badge:["50 EGP off your first service","خصم ٥٠ ج.م على أول خدمة"],
+  hero_h1:['Reliable home help in <span class="hl">Maadi</span>, on demand.','مساعدة منزلية موثوقة في <span class="hl">المعادي</span>، عند الطلب.'],
+  hero_lead:["Verified technicians for plumbing, electrical, AC, cleaning and more. Same-day service and transparent pricing, booked on WhatsApp in minutes.","فنيون موثوقون للسباكة والكهرباء والتكييف والتنظيف والمزيد. خدمة في نفس اليوم وأسعار واضحة، واحجز عبر واتساب في دقائق."],
+  f_service:["Service","الخدمة"],f_location:["Location","الموقع"],f_location_ph:["District, city","الحي، المدينة"],f_when:["When","الموعد"],
+  when_today:["Today","اليوم"],when_tom:["Tomorrow","غداً"],when_week:["This week","هذا الأسبوع"],
+  opt_plumb:["Plumbing","سباكة"],opt_elec:["Electrical","كهرباء"],opt_clean:["Cleaning","تنظيف"],opt_ac:["AC Maintenance","صيانة تكييف"],opt_handy:["Handyman","صيانة عامة"],opt_paint:["Painting","دهان"],opt_choose:["Choose a service…","اختر خدمة…"],
+  ss1:["Happy homes","منزل سعيد"],ss2:["Average rating","متوسط التقييم"],ss3:["Avg. response","متوسط الرد"],ss4:["Vetted pros","فني موثوق"],
+  cat_kick:["Browse","تصفّح"],cat_title:["Pick a service to get started","اختر خدمة للبدء"],
+  pros_kick:["Top rated","الأعلى تقييماً"],pros_title:["Pros your neighbours love","فنيون يحبهم جيرانك"],see_all:["See all pros","عرض كل الفنيين"],
+  how_kick:["How it works","كيف يعمل"],how_title:["Booked before your coffee's cold","احجز قبل أن تبرد قهوتك"],
+  how1_h:["Describe the job","صِف المهمة"],how1_p:["Tell us what you need, your location and preferred time. Add a photo so pros come prepared.","أخبرنا بما تحتاج وموقعك ووقتك المفضل. أضف صورة ليأتي الفني مستعداً."],
+  how2_h:["Pick your pro","اختر فنيّك"],how2_p:["Compare verified pros by rating, price and live availability, then choose your slot.","قارن الفنيين الموثوقين بالتقييم والسعر والتوفر، ثم اختر موعدك."],
+  how3_h:["Relax, it's handled","استرخِ، تمّ الأمر"],how3_p:["Track your pro in real time, pay securely in-app, and rate the job when it's done.","تابع فنيّك مباشرة، وادفع بأمان داخل التطبيق، وقيّم العمل عند انتهائه."],
+  dual_c_h:["For clients","للعملاء"],dual_c_p:["One marketplace for every home job, on your schedule.","سوق واحد لكل مهام المنزل، وفق جدولك."],
+  dual_c1:["Browse pros by live availability","تصفّح الفنيين حسب التوفر اللحظي"],dual_c2:["Transparent upfront pricing","أسعار واضحة مسبقاً"],dual_c3:["Secure in-app payment & chat","دفع ومحادثة آمنة داخل التطبيق"],dual_c4:["Reschedule or cancel anytime","أعد الجدولة أو الإلغاء في أي وقت"],dual_c_cta:["Open client dashboard","افتح لوحة العميل"],
+  dual_t_h:["For professionals","للفنيين"],dual_t_p:["Fill your calendar and grow your business, you stay in control.","املأ جدولك ونمِّ عملك، وأنت المتحكم."],
+  dual_t1:["Set your own schedule & rates","حدد جدولك وأسعارك"],dual_t2:["Accept or decline every request","اقبل أو ارفض كل طلب"],dual_t3:["Get paid fast, weekly payouts","استلم أرباحك أسبوعياً وبسرعة"],dual_t4:["Build a reputation that pays","ابنِ سمعة تُربح"],dual_t_cta:["Open pro dashboard","افتح لوحة الفني"],
+  bc_find:["Home / Find a pro","الرئيسية / ابحث عن فني"],find_h:["Available professionals","الفنيون المتاحون"],find_p:["Showing vetted pros with open slots. Tap any pro to view their profile and book.","نعرض فنيين موثوقين بمواعيد متاحة. اضغط على أي فني لعرض ملفه والحجز."],filt_all:["All","الكل"],
+  bc_book:["Home / Book a service","الرئيسية / احجز خدمة"],book_h:["Tell us what you need","أخبرنا بما تحتاج"],book_p:["Fill in the details below and your matched pro will confirm within minutes.","املأ التفاصيل أدناه وسيؤكد الفني المناسب خلال دقائق."],
+  book_form_h:["Service request","طلب خدمة"],book_form_sub:["All fields marked with * are required.","الحقول المعلّمة بـ * مطلوبة."],
+  f_name:["Full name","الاسم الكامل"],f_name_ph:["e.g. Layla Hassan","مثال: ليلى حسن"],f_phone:["Phone","الهاتف"],f_phone_ph:["+20 1xx xxx xxxx","+20 1xx xxx xxxx"],
+  f_loc_ph:["Street, district, city","الشارع، الحي، المدينة"],f_loc_hint:["Your exact address is shared only with the pro you confirm.","يُشارك عنوانك الدقيق فقط مع الفني الذي تؤكده."],
+  f_service2:["Service needed","الخدمة المطلوبة"],f_time:["Preferred time","الوقت المفضل"],
+  f_pref_pro:["Preferred professional","الفني المفضل"],f_pref_hint:["Optional, leave it to us and we'll match the best available pro.","اختياري، اتركها لنا وسنرشّح أفضل فني متاح."],
+  f_issue:["Issue description","وصف المشكلة"],f_issue_ph:["Describe the problem in detail…","صِف المشكلة بالتفصيل…"],
+  f_photo:["Photo upload","رفع صورة"],f_optional:["(optional)","(اختياري)"],f_photo_cta:["Click to upload photos of the issue","اضغط لرفع صور للمشكلة"],f_photo_hint:["JPG or PNG, up to 5 images","JPG أو PNG، حتى ٥ صور"],f_submit:["Send request on WhatsApp","إرسال الطلب عبر واتساب"],
+  sum_h:["Booking summary","ملخص الحجز"],sum_service:["Service","الخدمة"],sum_pro:["Professional","الفني"],sum_auto:["Auto-match","ترشيح تلقائي"],sum_when:["When","الموعد"],sum_where:["Where","المكان"],sum_callout:["Call-out fee","رسوم الانتقال"],sum_rate:["Est. hourly","تقدير بالساعة"],sum_total:["Est. total","التقدير الإجمالي"],sum_note:["You only pay after the job is confirmed complete. No charge to request.","تدفع فقط بعد تأكيد إتمام العمل. لا رسوم للطلب."],
+  bc_client:["Dashboard / Client","لوحة التحكم / العميل"],cl_h:["Welcome back, Layla","أهلاً بعودتك، ليلى"],cl_p:["Manage your bookings and upcoming visits.","أدِر حجوزاتك وزياراتك القادمة."],
+  cl_tab1:["Upcoming","القادمة"],cl_tab2:["My schedule","جدولي"],cl_tab3:["History","السجل"],
+  cl_s1:["Active bookings","حجوزات نشطة"],cl_s1b:["2 confirmed","٢ مؤكدة"],cl_s2:["This month spent","إنفاق هذا الشهر"],cl_s3:["Saved pros","فنيون محفوظون"],cl_s4:["Avg. response","متوسط الرد"],
+  bc_tech:["Dashboard / Professional","لوحة التحكم / الفني"],t_h:["Good morning, Ahmed","صباح الخير، أحمد"],t_p:["Here's your day. You have new requests waiting.","هذا جدول يومك. لديك طلبات جديدة بانتظارك."],
+  t_tab1:["My schedule","جدولي"],t_tab2:["Requests","الطلبات"],t_tab3:["Earnings","الأرباح"],
+  t_s1:["Today's jobs","مهام اليوم"],t_s1b:["2 done","٢ مكتملة"],t_s2:["This week earnings","أرباح الأسبوع"],t_s3:["Rating","التقييم"],t_s4:["Acceptance","نسبة القبول"],
+  m_hourly:["starting price","سعر يبدأ من"],m_rating:["rating","التقييم"],m_jobs:["jobs done","مهمة منجزة"],m_book:["Book this pro","احجز هذا الفني"],
+  foot_about:["FixIt is your go-to online marketplace for all things home services, trusted across Maadi.","فيكس إت هو وجهتك الأولى لكل خدمات المنزل، موثوقة في جميع أنحاء المعادي."],
+  foot_c1:["Company","الشركة"],foot_c2:["Services","الخدمات"],foot_c3:["Support","الدعم"],foot_help:["Help center","مركز المساعدة"],foot_safety:["Trust & safety","الثقة والأمان"],foot_terms:["Terms","الشروط"],foot_privacy:["Privacy","الخصوصية"],
+  foot_copy:["© 2026 FixIt. All rights reserved.","© ٢٠٢٦ فيكس إت. كل الحقوق محفوظة."],foot_made:["Made for every home.","صُنع لكل منزل."],
+  book:["Book","احجز"],view:["View","عرض"],accept:["Accept","قبول"],decline:["Decline","رفض"],reschedule:["Reschedule","إعادة جدولة"],
+  toast_book:["Booking request sent! Your pro will confirm shortly.","تم إرسال طلب الحجز! سيؤكد الفني قريباً."],
+  toast_accept:["Request accepted and added to your schedule.","تم قبول الطلب وإضافته إلى جدولك."],
+  toast_decline:["Request declined.","تم رفض الطلب."],
+  st_new:["New","جديد"],st_confirmed:["Confirmed","مؤكد"],st_done:["Completed","مكتمل"],verified:["Verified","موثّق"]
+};
+let LANG="en";
+const t=(k)=> I18N[k]? I18N[k][LANG==='en'?0:1] : k;
+const L=()=>LANG==='en'?0:1;
+
+function proRow(p){
+  const tags=p.tags[LANG].map(x=>`<span class="tag">${x}</span>`).join("");
+  return `<div class="pro-row" onclick="openPro(${p.id})">
+    <div class="ph"><img src="${p.img}"><span class="vf">✓</span></div>
+    <div><h4>${p.name[LANG]}</h4><div class="role">${p.role[LANG]}</div><div class="tags">${tags}</div></div>
+    <div class="nums"><div class="rt">★ ${p.rating}</div><small>${p.jobs} ${t('m_jobs')}</small></div>
+    <div class="price"><b>EGP ${p.rate}</b><small>${t('m_hourly')}</small></div>
+  </div>`;
+}
+function renderHome(){
+  document.getElementById('catGrid').innerHTML=CATS.map(c=>`<div class="cat" onclick="go('find')"><div class="ico">${c.icon}</div><div><span>${c[LANG]}</span><br><small>${c.cnt[LANG]}</small></div></div>`).join("");
+  document.getElementById('homeTaskers').innerHTML=PROS.slice(0,4).map(proRow).join("");
+}
+function renderFind(){ document.getElementById('findTaskers').innerHTML=PROS.map(proRow).join(""); }
+function renderPick(){ document.getElementById('pickRow').innerHTML=PROS.map(p=>`<div class="pick" data-pid="${p.id}" onclick="selectPick(${p.id})"><img src="${p.img}"><b>${p.name[LANG].split(' ')[0]}</b><small>${p.role[LANG]}</small></div>`).join(""); }
+
+const DAYS={en:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],ar:["إثن","ثلا","أرب","خمي","جمع","سبت","أحد"]};
+const HOURS=["09:00","11:00","13:00","15:00","17:00"];
+const TECH_APPTS=[[0,0,'b1','Plumbing','سباكة','Layla H.','ليلى ح.'],[0,2,'b2','Cleaning','تنظيف','Sara M.','سارة م.'],[1,1,'b3','AC repair','صيانة تكييف','Omar K.','عمر ك.'],[2,0,'b1','Pipe fix','إصلاح ماسورة','Ahmed S.','أحمد س.'],[2,3,'b4','Wiring','تمديدات','Mona T.','منى ت.'],[3,2,'b2','Deep clean','تنظيف عميق','Hana R.','هنا ر.'],[4,1,'b3','Install','تركيب','Tarek Z.','طارق ز.']];
+const CLIENT_APPTS=[[0,1,'b1','Plumbing','سباكة','Ahmed H.','أحمد ح.'],[2,2,'b3','AC service','صيانة تكييف','Tarek A.','طارق ع.'],[4,0,'b2','Cleaning','تنظيف','Mariam S.','مريم ص.']];
+function renderCal(elId,appts){
+  let html=`<div class="cal-head"><div></div>${DAYS[LANG].map((d,i)=>`<div>${d}<b>${10+i}</b></div>`).join("")}</div>`;
+  HOURS.forEach((h,hi)=>{
+    html+=`<div class="cal-row"><div class="cal-time">${h}</div>`;
+    for(let d=0;d<7;d++){const a=appts.find(x=>x[0]===d&&x[1]===hi);
+      html+= a? `<div class="cal-cell"><div class="appt ${a[2]}" onclick="showToast(a_t('${a[3]}','${a[4]}')+' · '+a_t('${a[5]}','${a[6]}'))">${a[3+L()]}<small>${a[5+L()]}</small></div></div>`:`<div class="cal-cell"></div>`;}
+    html+=`</div>`;
+  });
+  document.getElementById(elId).innerHTML=html;
+}
+function a_t(en,ar){return LANG==='en'?en:ar;}
+
+const REQUESTS=[{img:"https://i.pravatar.cc/120?img=45",name:{en:"Layla Hassan",ar:"ليلى حسن"},svc:{en:"Leaking kitchen sink",ar:"تسريب حوض المطبخ"},loc:{en:"Maadi, Cairo",ar:"المعادي، القاهرة"},time:{en:"Today, 3:00 PM",ar:"اليوم، ٣:٠٠ م"},status:"new"},{img:"https://i.pravatar.cc/120?img=23",name:{en:"Ahmed Sami",ar:"أحمد سامي"},svc:{en:"Bathroom pipe replacement",ar:"استبدال ماسورة الحمام"},loc:{en:"Maadi, Cairo",ar:"المعادي، القاهرة"},time:{en:"Tomorrow, 11:00 AM",ar:"غداً، ١١:٠٠ ص"},status:"new"},{img:"https://i.pravatar.cc/120?img=53",name:{en:"Mona Tarek",ar:"منى طارق"},svc:{en:"Water heater install",ar:"تركيب سخان مياه"},loc:{en:"Maadi, Cairo",ar:"المعادي، القاهرة"},time:{en:"Wed, 1:00 PM",ar:"الأربعاء، ١:٠٠ م"},status:"new"}];
+const CLIENT_BOOKINGS=[{img:"https://i.pravatar.cc/120?img=12",name:{en:"Ahmed Hassan",ar:"أحمد حسن"},svc:{en:"Kitchen sink leak repair",ar:"إصلاح تسريب حوض المطبخ"},loc:{en:"Your home · Maadi",ar:"منزلك · المعادي"},time:{en:"Today, 3:00 PM",ar:"اليوم، ٣:٠٠ م"},status:"confirmed"},{img:"https://i.pravatar.cc/120?img=58",name:{en:"Tarek Ali",ar:"طارق علي"},svc:{en:"AC annual maintenance",ar:"صيانة سنوية للتكييف"},loc:{en:"Your home · Maadi",ar:"منزلك · المعادي"},time:{en:"Wed, 1:00 PM",ar:"الأربعاء، ١:٠٠ م"},status:"confirmed"},{img:"https://i.pravatar.cc/120?img=5",name:{en:"Mariam Saleh",ar:"مريم صالح"},svc:{en:"Full apartment deep clean",ar:"تنظيف عميق للشقة"},loc:{en:"Your home · Maadi",ar:"منزلك · المعادي"},time:{en:"Fri, 9:00 AM",ar:"الجمعة، ٩:٠٠ ص"},status:"new"}];
+const CLIENT_HISTORY=[{img:"https://i.pravatar.cc/120?img=20",name:{en:"Hana Mostafa",ar:"هنا مصطفى"},svc:{en:"Shelf mounting (×3)",ar:"تركيب أرفف (×٣)"},loc:{en:"Completed · Rated ★5",ar:"مكتمل · تقييم ★٥"},time:{en:"May 28",ar:"٢٨ مايو"},status:"done"},{img:"https://i.pravatar.cc/120?img=15",name:{en:"Youssef Galal",ar:"يوسف جلال"},svc:{en:"Living room repaint",ar:"إعادة دهان غرفة المعيشة"},loc:{en:"Completed · Rated ★5",ar:"مكتمل · تقييم ★٥"},time:{en:"May 14",ar:"١٤ مايو"},status:"done"}];
+const EARNINGS=[{img:"https://i.pravatar.cc/120?img=45",name:{en:"Layla Hassan",ar:"ليلى حسن"},svc:{en:"Sink leak repair",ar:"إصلاح تسريب الحوض"},loc:{en:"Paid · EGP 330",ar:"مدفوع · ٣٣٠ ج.م"},time:{en:"Jun 8",ar:"٨ يونيو"},status:"done"},{img:"https://i.pravatar.cc/120?img=23",name:{en:"Ahmed Sami",ar:"أحمد سامي"},svc:{en:"Pipe replacement",ar:"استبدال ماسورة"},loc:{en:"Paid · EGP 540",ar:"مدفوع · ٥٤٠ ج.م"},time:{en:"Jun 6",ar:"٦ يونيو"},status:"done"},{img:"https://i.pravatar.cc/120?img=53",name:{en:"Mona Tarek",ar:"منى طارق"},svc:{en:"Heater install",ar:"تركيب سخان"},loc:{en:"Paid · EGP 720",ar:"مدفوع · ٧٢٠ ج.م"},time:{en:"Jun 3",ar:"٣ يونيو"},status:"done"}];
+function reqCard(r,actions){
+  const st=r.status==='new'?`<span class="pill new">${t('st_new')}</span>`:r.status==='confirmed'?`<span class="pill confirmed">${t('st_confirmed')}</span>`:`<span class="pill done">${t('st_done')}</span>`;
+  return `<div class="req-card"><img src="${r.img}"><div><h4>${r.svc[LANG]} ${st}</h4><div class="det"><span>👤 ${r.name[LANG]}</span><span>📍 ${r.loc[LANG]}</span><span>🕑 ${r.time[LANG]}</span></div></div><div class="req-actions">${actions}</div></div>`;
+}
+function renderLists(){
+  document.getElementById('techRequests').innerHTML=REQUESTS.map(r=>reqCard(r,`<button class="btn-sm btn-accept" onclick="showToast(t('toast_accept'))">${t('accept')}</button><button class="btn-sm btn-decline" onclick="showToast(t('toast_decline'))">${t('decline')}</button>`)).join("");
+  document.getElementById('techEarnings').innerHTML=EARNINGS.map(r=>reqCard(r,'')).join("");
+  document.getElementById('clientBookings').innerHTML=CLIENT_BOOKINGS.map(r=>reqCard(r,`<button class="btn-sm btn-decline" onclick="showToast(t('reschedule'))">${t('reschedule')}</button>`)).join("");
+  document.getElementById('clientHistory').innerHTML=CLIENT_HISTORY.map(r=>reqCard(r,`<button class="btn-sm btn-decline">${t('view')}</button>`)).join("");
+}
+function go(view){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(view).classList.add('active');document.querySelectorAll('.nav-links button').forEach(b=>b.classList.toggle('active',b.dataset.go===view));window.scrollTo({top:0,behavior:'smooth'});}
+document.getElementById('navlinks').addEventListener('click',e=>{if(e.target.dataset.go)go(e.target.dataset.go);});
+function setupTabs(id){document.getElementById(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;b.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const c=b.closest('.view');c.querySelectorAll('.dash-pane').forEach(p=>p.classList.add('hidden'));document.getElementById(b.dataset.tab).classList.remove('hidden');});}
+setupTabs('clTabs');setupTabs('tTabs');
+document.getElementById('findFilters').addEventListener('click',e=>{if(e.target.classList.contains('chip')){document.querySelectorAll('#findFilters .chip').forEach(c=>c.classList.remove('sel'));e.target.classList.add('sel');}});
+let currentPro=null;
+function openPro(id){const p=PROS.find(x=>x.id===id);currentPro=p;m_img.src=p.img;m_name.textContent=p.name[LANG];m_role.textContent=p.role[LANG];m_bio.textContent=p.bio[LANG];m_rate.textContent="EGP "+p.rate;m_rating.textContent="★ "+p.rating;m_jobs.textContent=p.jobs;document.getElementById('modal').classList.add('open');}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function bookThisPro(){closeModal();go('book');if(currentPro){selectPick(currentPro.id);document.getElementById('bf_service').selectedIndex=({plumb:1,elec:2,clean:3,ac:4,handy:5,paint:6})[currentPro.cat]||0;updateSummary();}}
+let selectedPro=null;
+function selectPick(id){selectedPro=id;document.querySelectorAll('#pickRow .pick').forEach(p=>p.classList.toggle('sel',+p.dataset.pid===id));updateSummary();}
+function previewPhotos(e){const box=document.getElementById('v2-previews');box.innerHTML="";[...e.target.files].slice(0,5).forEach(f=>{const img=document.createElement('img');img.src=URL.createObjectURL(f);box.appendChild(img);});}
+function updateSummary(){const svc=document.getElementById('bf_service');document.getElementById('sum_service').textContent=svc.value?svc.options[svc.selectedIndex].text:"—";const pro=selectedPro?PROS.find(p=>p.id===selectedPro):null;document.getElementById('sum_pro').textContent=pro?pro.name[LANG]:t('sum_auto');const tm=document.getElementById('bf_time').value;document.getElementById('sum_when').textContent=tm?tm.replace('T',' · '):"—";document.getElementById('sum_where').textContent=document.getElementById('bf_loc').value||"—";const rate=pro?pro.rate:180;document.getElementById('sum_rate').textContent="EGP "+rate;document.getElementById('sum_total').textContent="EGP "+(rate+150);}
+document.addEventListener('input',e=>{if(['bf_service','bf_time','bf_loc'].includes(e.target.id))updateSummary();});
+function submitBooking(e){e.preventDefault();showToast(t('toast_book'));setTimeout(()=>go('client'),900);}
+let toastTimer;
+function showToast(msg){const el=document.getElementById('toast');document.getElementById('toastMsg').textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600);}
+function applyI18n(){document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(I18N[k])el.innerHTML=I18N[k][L()];});document.querySelectorAll('[data-ph]').forEach(el=>{const k=el.dataset.ph;if(I18N[k])el.placeholder=I18N[k][L()];});}
+function toggleLang(){LANG=LANG==='en'?'ar':'en';document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';document.getElementById('langLabel').textContent=LANG==='en'?'العربية':'English';applyI18n();renderAll();}
+function renderAll(){renderHome();renderFind();renderPick();renderLists();renderCal('techCal',TECH_APPTS);renderCal('clientCal',CLIENT_APPTS);updateSummary();}
+applyI18n();renderAll();
+</script>
+</body>
+</html>
