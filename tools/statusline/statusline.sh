@@ -14,7 +14,8 @@
 # Responsive: reflows by $COLUMNS (which Claude Code exports) across three tiers
 # so ALL information stays visible as the window shrinks — it never truncates.
 #
-# Requires: Git Bash (ships with Git for Windows) and jq (winget install jqlang.jq).
+# Requires: bash (built in on macOS/Linux; Git Bash on Windows) and jq
+#   (macOS: brew install jq · Windows: winget install jqlang.jq).
 # Shared via git so a `git pull` updates every teammate — see tools/statusline/.
 
 JQ=$(command -v jq)
